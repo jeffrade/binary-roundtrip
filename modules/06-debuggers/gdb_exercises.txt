@@ -1,0 +1,424 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                   GDB GUIDED EXERCISES                              ║
+║              Module 6: Debuggers at the Binary Level                ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Before starting, build everything:
+
+  cd modules/06-debuggers
+  make all
+
+══════════════════════════════════════════════════════════════════════
+ EXERCISE 1: Navigate debug_me.c — Breakpoints, Stepping, Inspection
+══════════════════════════════════════════════════════════════════════
+
+Goal: Get comfortable with basic GDB navigation and variable inspection.
+Time: ~15 minutes
+
+1. Start GDB with the debug binary:
+   $ gdb -q ./bin/debug_me
+
+2. Set a breakpoint at main and run:
+   (gdb) break main
+   (gdb) run
+
+3. You should stop at the first line of main(). Look around:
+   (gdb) list                    -- see the source code
+   (gdb) info breakpoints        -- see your breakpoint
+
+4. Step to the init_dataset() call and step INTO it:
+   (gdb) next                    -- skip the printf lines
+   (gdb) next                    -- keep going...
+   (gdb) step                    -- step INTO init_dataset()
+
+5. Inside init_dataset(), inspect the loop:
+   (gdb) break init_dataset      -- (already there, but this shows the syntax)
+   (gdb) print i                 -- see the loop counter
+   (gdb) next                    -- step through the loop body
+   (gdb) print dataset[0]        -- see the first element after initialization
+   (gdb) print dataset[0].name   -- just the name field
+   (gdb) continue                -- run to end of function (or finish)
+
+6. Back in main, step into process_data():
+   (gdb) step
+
+7. Set up auto-display for the loop:
+   (gdb) display i
+   Now every time you step, the value of i is printed automatically.
+
+8. Step into compute() for the first iteration:
+   (gdb) step                    -- enters compute()
+   (gdb) print *dp               -- dereference the pointer to see the struct
+   (gdb) print dp->name          -- just the name
+   (gdb) print dp->value         -- the input value
+
+9. Go deeper — step into helper():
+   (gdb) step                    -- enters helper()
+   (gdb) backtrace               -- see the full call chain!
+   You should see: helper < compute < process_data < main
+
+10. Navigate the call stack:
+    (gdb) frame 0                -- you're in helper (current frame)
+    (gdb) info locals            -- helper's local variables
+    (gdb) frame 1                -- jump to compute's frame
+    (gdb) info locals            -- compute's local variables
+    (gdb) info args              -- compute's arguments
+    (gdb) frame 3                -- jump to main's frame
+    (gdb) print dataset[0]       -- inspect main's data from any frame!
+
+11. Return from helper:
+    (gdb) frame 0                -- back to current frame
+    (gdb) finish                 -- run until helper returns
+    GDB prints: "Value returned is $1 = ..."
+
+12. Set a conditional breakpoint:
+    (gdb) break classify if result > 30.0
+    (gdb) continue               -- runs until classify is called with result > 30
+    (gdb) print result           -- verify the condition
+
+13. Clean up and finish:
+    (gdb) delete                 -- remove all breakpoints
+    (gdb) continue               -- let the program finish
+    (gdb) quit
+
+
+══════════════════════════════════════════════════════════════════════
+ EXERCISE 2: Find the 3 Bugs in find_the_bug.c
+══════════════════════════════════════════════════════════════════════
+
+Goal: Use GDB to find three intentional bugs. Do NOT read the answers at
+      the bottom of the source file until you've found them yourself.
+Time: ~20 minutes
+
+--- Bug 1: Something wrong with compute_average() ---
+
+1. Start GDB:
+   $ gdb -q ./bin/find_the_bug
+
+2. Set a breakpoint in compute_average and run:
+   (gdb) break compute_average
+   (gdb) run
+
+3. Inspect the inputs:
+   (gdb) print count             -- should be 5
+   (gdb) print scores[0]        -- 85
+   (gdb) print scores[1]        -- 92
+   (gdb) print scores[2]        -- 78
+   (gdb) print scores[3]        -- 96
+   (gdb) print scores[4]        -- 88
+
+4. Now check: what's at scores[5]?
+   (gdb) print scores[5]        -- ??? This shouldn't be accessed!
+
+5. Watch the loop execute:
+   (gdb) display i
+   (gdb) display sum
+   (gdb) next                   -- step through the loop
+
+6. QUESTION: How many iterations does the loop run? It should run 5
+   times (i=0 to 4), but does it run 6 times (i=0 to 5)?
+   Look at the loop condition: is it i < count or i <= count?
+
+7. Write down the bug. Move on to the next one.
+
+--- Bug 2: Something wrong with find_maximum() ---
+
+8. Set a breakpoint:
+   (gdb) break find_maximum
+   (gdb) continue               -- or 'run' to restart
+
+9. Stop at the beginning of find_maximum:
+   (gdb) print max_val          -- WHAT is this value?
+   It should be a sensible starting value, but is it?
+
+10. (gdb) info locals           -- see all local variables
+    Look at max_val. Is it initialized to anything meaningful?
+
+11. The input data is all NEGATIVE: {-5, -12, -3, -8, -1}
+    If max_val starts at some random positive number (stack garbage),
+    NONE of these values will be greater than max_val!
+
+12. Write down the bug.
+
+--- Bug 3: Something wrong with compute_product() ---
+
+13. Set a breakpoint:
+    (gdb) break compute_product
+    (gdb) continue
+
+14. Check the inputs:
+    (gdb) print a               -- 100000
+    (gdb) print b               -- 100000
+
+15. Step over the multiplication:
+    (gdb) next
+    (gdb) print result          -- WHAT?! Is this 10,000,000,000?
+
+16. Try computing it yourself in GDB:
+    (gdb) print a * b           -- GDB uses int arithmetic too!
+    (gdb) print (long long)a * b -- NOW what's the answer?
+
+17. What's the maximum value of a 32-bit signed int?
+    (gdb) print 0x7FFFFFFF      -- 2,147,483,647
+    100000 * 100000 = 10,000,000,000 which exceeds this!
+
+18. Write down the bug. Did you find all three?
+
+19. (gdb) quit
+
+Check your answers against the spoilers at the bottom of find_the_bug.c.
+
+
+══════════════════════════════════════════════════════════════════════
+ EXERCISE 3: Diagnose the Segfault
+══════════════════════════════════════════════════════════════════════
+
+Goal: Use GDB's backtrace to find a NULL pointer dereference.
+Time: ~10 minutes
+
+1. Start GDB and run the crashing program:
+   $ gdb -q ./bin/segfault
+   (gdb) run
+
+2. The program crashes with SIGSEGV. GDB shows where:
+   Program received signal SIGSEGV, Segmentation fault.
+   0x... in deep_process (config=0x0, multiplier=3) at segfault.c:XX
+
+3. IMMEDIATELY look at the backtrace:
+   (gdb) backtrace
+
+   You should see something like:
+   #0  deep_process (config=0x0, multiplier=3)
+   #1  process_node (node=0x..., index=2)
+   #2  traverse_list (ctx=0x...)
+   #3  main ()
+
+4. The crash is in frame #0. Inspect it:
+   (gdb) frame 0
+   (gdb) print config            -- It's 0x0 (NULL)!
+   (gdb) list                    -- See the crashing line
+
+5. WHO passed NULL to deep_process? Go up one frame:
+   (gdb) frame 1
+   (gdb) list                    -- See the call to deep_process
+   (gdb) print node->config      -- It's NULL! This is what was passed.
+   (gdb) print *node             -- See the full node structure
+   (gdb) print index             -- It's 2 — the third node
+
+6. Go up another frame to see the list traversal:
+   (gdb) frame 2
+   (gdb) print *ctx              -- See the context
+   (gdb) print ctx->node_count   -- 3 nodes
+
+7. Inspect the linked list to find which node has NULL config:
+   (gdb) print *ctx->head                        -- node 0: config is valid
+   (gdb) print *ctx->head->next                  -- node 1: config is valid
+   (gdb) print *ctx->head->next->next            -- node 2: config is ???
+   (gdb) print ctx->head->next->next->config     -- NULL!
+
+8. DIAGNOSIS:
+   Node 2's config pointer is NULL. The code in process_node() passes
+   node->config to deep_process() without checking if it's NULL.
+   deep_process() then tries to access config->name, which dereferences
+   NULL → SIGSEGV.
+
+9. (gdb) quit
+
+BONUS: How would you FIX this? Add a NULL check:
+   if (node->config == NULL) { printf("skipping node with no config\n"); return; }
+
+
+══════════════════════════════════════════════════════════════════════
+ EXERCISE 4: Compare Stripped vs Unstripped Debugging
+══════════════════════════════════════════════════════════════════════
+
+Goal: See how much harder debugging is without symbols.
+Time: ~10 minutes
+
+First, build both versions:
+  $ make stripped
+
+--- Part A: Debugging WITH symbols ---
+
+1. Start with the unstripped version:
+   $ gdb -q ./bin/with_symbols
+
+2. Verify you have debug info:
+   (gdb) break main              -- Works!
+   (gdb) run
+   (gdb) list                    -- Source code is visible!
+   (gdb) info locals             -- Variable names and values!
+
+3. Step to a function and inspect a struct:
+   (gdb) break compute_value
+   (gdb) continue
+   (gdb) print *p                -- Full struct with named fields
+   (gdb) print p->label          -- "Origin"
+   (gdb) ptype struct Point      -- Shows the struct definition
+   (gdb) info args               -- Shows function parameters by name
+
+4. (gdb) quit
+
+--- Part B: Debugging WITHOUT symbols (stripped) ---
+
+5. Start with the stripped version:
+   $ gdb -q ./bin/stripped
+
+6. Try the same commands:
+   (gdb) break main              -- FAILS: "Function 'main' not defined"
+   (gdb) info functions           -- No function names!
+
+7. You need to find the entry point manually:
+   $ readelf -h bin/stripped | grep Entry
+   (note the entry address, e.g., 0x1060)
+
+   Actually, GDB can find _start (the ELF entry):
+   (gdb) info files               -- Shows sections and entry point
+   (gdb) break *0x<entry_addr>   -- Break at entry point
+   (gdb) run
+
+8. Once stopped, try to inspect:
+   (gdb) list                    -- "No symbol table is loaded"
+   (gdb) info locals             -- "No symbol table info available"
+   (gdb) disassemble             -- This WORKS — you see raw assembly
+
+9. You're reduced to binary-level debugging:
+   (gdb) info registers          -- Only way to see values
+   (gdb) x/10i $pc              -- See upcoming instructions
+   (gdb) x/8xg $rsp             -- Examine the stack manually
+   (gdb) stepi                   -- Step one instruction at a time
+
+10. (gdb) quit
+
+11. Compare file sizes:
+    $ ls -la bin/with_symbols bin/stripped
+    The stripped version is much smaller — all that debug info is gone!
+
+
+══════════════════════════════════════════════════════════════════════
+ EXERCISE 5: Binary-Level Debugging — Assembly and Registers
+══════════════════════════════════════════════════════════════════════
+
+Goal: Work at the instruction level — disassemble, step through
+      instructions, inspect registers.
+Time: ~15 minutes
+
+1. Start GDB with debug_me:
+   $ gdb -q ./bin/debug_me
+
+2. Set Intel syntax (easier to read than AT&T):
+   (gdb) set disassembly-flavor intel
+
+3. Break at compute() and run:
+   (gdb) break compute
+   (gdb) run
+
+4. Disassemble the current function:
+   (gdb) disassemble
+   You'll see the assembly instructions for compute().
+   Note: each C line becomes MULTIPLE assembly instructions.
+
+5. Try the mixed view (source + assembly):
+   (gdb) disassemble /m
+   This interleaves source lines with their assembly translations.
+
+6. Switch to instruction-level stepping:
+   (gdb) stepi                  -- execute ONE instruction
+   (gdb) info registers         -- see all register values
+   (gdb) print/x $rdi           -- first argument (dp pointer)
+   (gdb) print/x $rsp           -- stack pointer
+
+7. Enable TUI for a split view:
+   (gdb) tui enable
+   (gdb) layout split           -- source + assembly side by side
+   (gdb) layout regs            -- add register display
+
+   (If TUI gets messy, press Ctrl-L to refresh)
+
+8. Watch function arguments in registers:
+   (gdb) break helper
+   (gdb) continue
+   (gdb) info registers rdi rsi  -- first two args? (depends on types)
+   (gdb) print $xmm0             -- floating point args go in xmm registers!
+
+   For doubles, arguments go in %xmm0, %xmm1, etc. (not rdi/rsi).
+
+9. Examine the stack frame:
+   (gdb) info frame              -- detailed frame info
+   (gdb) x/8xg $rsp             -- raw stack contents (8 quad-words)
+   (gdb) x/xg $rbp              -- saved base pointer
+   (gdb) x/xg $rbp+8            -- return address
+
+10. Look at how a function call works at the binary level:
+    (gdb) break compute
+    (gdb) run                    -- restart
+    (gdb) disassemble /r         -- show with raw bytes
+    Look for the 'call' instruction to helper(). Note its address.
+
+11. Set a breakpoint right at the 'call' instruction:
+    (gdb) break *<address_of_call_instruction>
+    (gdb) continue
+    (gdb) x/xg $rsp             -- stack before call
+    (gdb) stepi                  -- execute the call
+    (gdb) x/xg $rsp             -- stack after call — return address was pushed!
+    (gdb) print/x *((long*)$rsp) -- the return address on the stack
+
+12. Look at the function prologue:
+    (gdb) disassemble
+    The first instructions should be:
+      push rbp           -- save caller's base pointer
+      mov  rbp, rsp      -- set up our base pointer
+      sub  rsp, N        -- allocate space for local variables
+
+    This is the "stack frame setup" you learned about in Module 4.
+
+13. Clean up:
+    (gdb) tui disable
+    (gdb) quit
+
+
+══════════════════════════════════════════════════════════════════════
+ BONUS EXERCISE: Debugging Rust with GDB
+══════════════════════════════════════════════════════════════════════
+
+Goal: See that Rust's debug info works with GDB, with some differences.
+Time: ~10 minutes
+
+1. Build the Rust debug binary:
+   $ make rust-debug
+
+2. Start GDB (use rust-gdb if available for better pretty-printing):
+   $ rust-gdb -q ./bin/debug_me_rs 2>/dev/null || gdb -q ./bin/debug_me_rs
+
+3. Set a breakpoint using Rust's module path:
+   (gdb) break debug_me::main
+   (gdb) run
+
+4. Step through and inspect:
+   (gdb) next                    -- step through Rust code
+   (gdb) info locals             -- see local variables
+   (gdb) step                    -- step into create_dataset
+
+5. Inspect Rust types:
+   (gdb) print dataset           -- Vec<DataPoint>
+   Note: Vec shows internal fields (pointer, length, capacity)
+
+6. Try breaking in other functions:
+   (gdb) break debug_me::compute
+   (gdb) continue
+   (gdb) print *dp               -- the DataPoint struct
+   (gdb) info args
+
+7. Backtrace works the same:
+   (gdb) break debug_me::helper
+   (gdb) continue
+   (gdb) backtrace               -- shows Rust function names
+
+8. Key differences from C:
+   - Function names include the module path (debug_me::helper)
+   - String is a struct with pointer, length, capacity
+   - Vec is a struct wrapping a raw pointer + length + capacity
+   - Enum variants show the discriminant
+   - rust-gdb has pretty printers that make these look nicer
+
+9. (gdb) quit

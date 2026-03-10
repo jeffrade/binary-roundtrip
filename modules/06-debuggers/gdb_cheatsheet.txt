@@ -1,0 +1,274 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                    GDB QUICK REFERENCE CARD                         ║
+║              Module 6: Debuggers at the Binary Level                ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ STARTING GDB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  gdb ./program              Start GDB with a binary
+  gdb -q ./program           Start without the banner (quiet mode)
+  gdb --args ./prog a b      Start with command-line arguments
+  gdb -p PID                 Attach to a running process
+
+  Inside GDB:
+  (gdb) file ./program       Load a binary
+  (gdb) set args foo bar     Set command-line arguments
+  (gdb) run                  Start (or restart) the program
+  (gdb) run < input.txt      Run with stdin redirected
+  (gdb) quit                 Exit GDB (or Ctrl-D)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ BREAKPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  break main                 Break at the start of main()
+  break function_name        Break at a function
+  break file.c:42            Break at line 42 of file.c
+  break *0x4011a0            Break at a specific address (binary level!)
+
+  tbreak main                Temporary breakpoint (auto-deletes after first hit)
+  rbreak compute.*           Break on all functions matching regex
+
+  Conditional breakpoints:
+  break foo if x > 10        Only stop when x > 10
+  condition 3 i == 5         Add condition to breakpoint #3
+
+  Managing breakpoints:
+  info breakpoints           List all breakpoints (shortcut: info b)
+  delete 3                   Delete breakpoint #3
+  delete                     Delete ALL breakpoints
+  disable 2                  Disable breakpoint #2 (keep it, but don't stop)
+  enable 2                   Re-enable breakpoint #2
+  clear function_name        Remove breakpoint at function
+
+  Watchpoints (stop when a value changes):
+  watch variable             Stop when variable is WRITTEN
+  rwatch variable            Stop when variable is READ
+  awatch variable            Stop when variable is READ or WRITTEN
+  watch *(int*)0x7fff1234    Watch a memory address
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ NAVIGATION (SOURCE LEVEL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  run (r)                    Start the program
+  continue (c)               Resume execution until next breakpoint
+  next (n)                   Execute one line (step OVER function calls)
+  step (s)                   Execute one line (step INTO function calls)
+  finish                     Run until current function returns
+  until 50                   Run until line 50 (useful to skip loops)
+  advance function_name      Run until reaching the named function
+
+  Repeat: just press ENTER to repeat the last command
+          (very useful for step/next/continue)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ NAVIGATION (BINARY/INSTRUCTION LEVEL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  stepi (si)                 Execute ONE machine instruction (step into)
+  nexti (ni)                 Execute ONE instruction (step over calls)
+  disassemble                Disassemble the current function
+  disas function_name        Disassemble a specific function
+  disas /m                   Disassemble with source lines interleaved
+  disas /r                   Disassemble with raw bytes shown
+
+  x/10i $pc                  Show next 10 instructions from current PC
+  set disassembly-flavor intel    Use Intel syntax (default is AT&T)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ INSPECTING VARIABLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  print variable (p)         Print a variable's value
+  print/x variable           Print in hexadecimal
+  print/d variable           Print in decimal
+  print/t variable           Print in binary
+  print/c variable           Print as character
+  print/f variable           Print as float
+
+  print *pointer             Dereference a pointer
+  print array[3]             Print array element
+  print *array@5             Print 5 elements starting at array
+  print struct_var.field     Print a struct field
+  print ptr->field           Print field through pointer
+
+  Expressions:
+  print x + y                Evaluate an expression
+  print sizeof(var)          Print size
+  print (double)i / n        Cast and compute
+
+  Auto-display (print at every stop):
+  display variable           Auto-print variable at every breakpoint/step
+  display/x $rax             Auto-print register in hex
+  info display               List all auto-displays
+  undisplay 2                Remove auto-display #2
+
+  info locals                Show ALL local variables in current frame
+  info args                  Show function arguments
+  ptype variable             Show the TYPE of a variable
+  ptype struct MyStruct      Show struct definition
+  whatis variable            Quick type check
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ STACK AND CALL FRAMES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  backtrace (bt)             Show the call stack (most important command!)
+  bt full                    Backtrace with all local variables
+  bt 5                       Show only top 5 frames
+
+  frame 0                    Switch to frame #0 (innermost / current)
+  frame 3                    Switch to frame #3
+  up                         Move one frame up (toward main)
+  down                       Move one frame down (toward current)
+
+  info frame                 Detailed info about current frame
+  info frame 2               Detailed info about frame #2
+
+  Binary-level stack inspection:
+  x/16xg $rsp                Show 16 quad-words on the stack
+  x/4xg $rbp                 Show the base pointer region
+  info registers rsp rbp     Show stack and base pointers
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ REGISTERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  info registers             Show all general-purpose registers
+  info registers rax rbx     Show specific registers
+  info all-registers         Show ALL registers (including FP, SSE, etc.)
+
+  print $rax                 Print a specific register
+  print/x $rdi               Print register in hex
+  set $rax = 42              Modify a register (careful!)
+
+  x86_64 calling convention reminder:
+    Arguments:  %rdi, %rsi, %rdx, %rcx, %r8, %r9
+    Return:     %rax
+    Stack ptr:  %rsp
+    Base ptr:   %rbp (if frame pointer is used)
+    Inst. ptr:  %rip (program counter)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ EXAMINING MEMORY (x/ command)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Syntax: x/NFS ADDRESS
+    N = count (how many units)
+    F = format (x=hex, d=decimal, s=string, i=instruction, c=char, f=float)
+    S = size (b=byte, h=halfword/2B, w=word/4B, g=giant/8B)
+
+  Common examples:
+  x/s 0x402010               Print a string at address
+  x/10xb ptr                 Show 10 bytes in hex
+  x/4xw ptr                  Show 4 words (32-bit) in hex
+  x/8xg $rsp                 Show 8 quad-words (64-bit) from stack
+  x/10i $pc                  Show 10 instructions from current PC
+  x/d &variable              Show variable as decimal
+  x/f &double_var            Show as floating point
+  x/20xb buf                 Hex dump of 20 bytes (good for buffers)
+  x/c ptr                    Show as character
+
+  Useful memory patterns:
+  x/gx $rbp                  Saved base pointer
+  x/gx $rbp+8                Return address (on the stack)
+  x/s *((char**)$rdi)        String pointed to by first arg
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SOURCE CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  list (l)                   Show 10 lines around current position
+  list 1,50                  Show lines 1 through 50
+  list function_name         Show code around a function
+  list file.c:42             Show code around line 42
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ TUI (TEXT USER INTERFACE) — Split-Screen Mode
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  tui enable                 Enable TUI mode (or press Ctrl-X, A)
+  tui disable                Disable TUI mode
+  layout src                 Show source code panel
+  layout asm                 Show assembly panel
+  layout split               Show BOTH source and assembly
+  layout regs                Show registers panel
+  focus cmd                  Give keyboard focus to command window
+  focus src                  Give keyboard focus to source window
+  refresh                    Redraw the screen (Ctrl-L)
+  winheight src +5           Make source window 5 lines taller
+  winheight asm -3           Make assembly window 3 lines shorter
+
+  TUI navigation:
+    Arrow keys scroll the focused window
+    Use 'focus cmd' to type commands again
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SIGNALS AND CRASHES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  When a program crashes (SIGSEGV, SIGABRT, etc.):
+  (gdb) bt                   See where it crashed
+  (gdb) frame 0              Go to the crash site
+  (gdb) info locals          See local variables
+  (gdb) print ptr            Check if a pointer is NULL
+  (gdb) list                 See the source code
+
+  handle SIGUSR1 nostop      Don't stop on SIGUSR1
+  handle SIGPIPE stop        Stop on SIGPIPE
+  info signals               Show signal handling settings
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ USEFUL TRICKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  shell ls                   Run a shell command from within GDB
+  set print pretty on        Pretty-print structs (one field per line)
+  set print array on         Pretty-print arrays
+  set pagination off         Don't pause for "press return"
+  set follow-fork-mode child Follow the child after fork()
+
+  define hook-stop           Run commands at every stop:
+    info registers
+    x/i $pc
+  end
+
+  Save breakpoints for next session:
+  save breakpoints bps.txt
+  source bps.txt             Reload breakpoints
+
+  Reverse debugging (if supported):
+  target record-full         Start recording execution
+  reverse-next               Step BACKWARD
+  reverse-step               Step backward into functions
+  reverse-continue           Run backward to previous breakpoint
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GDB WITH RUST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  break module::function     Use Rust's module path (e.g., debug_me::main)
+  break file.rs:42           Break by file and line number
+  print vec                  Print a Vec (GDB shows the internal repr)
+  print string               Print a String
+  print &string as &str      Cast to see the string content
+
+  Rust-gdb (if available):
+    rust-gdb ./binary        GDB with Rust-specific pretty printers
+    This makes Vec, String, HashMap, etc. display more nicely.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KEYBOARD SHORTCUTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Enter          Repeat last command
+  Ctrl-C         Interrupt running program (but stay in GDB)
+  Ctrl-D         Quit GDB
+  Ctrl-X, A      Toggle TUI mode
+  Ctrl-X, 2      Toggle second TUI window (asm or regs)
+  Ctrl-L         Refresh screen
+  Tab            Auto-complete commands and symbols
+  Ctrl-P/N       Command history (up/down)
