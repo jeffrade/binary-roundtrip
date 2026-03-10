@@ -13,7 +13,7 @@
 #     - SIMPLER: designed for Ruby's dynamic nature, not aggressive speculation
 #     - LAZY: compiles methods as they're called, not based on hotness counters
 #
-#   YJIT typically gives 15-30% speedup on Rails apps. Not as dramatic as
+#   YJIT typically gives 15-30% speedup on Ruby apps. Not as dramatic as
 #   JVM's JIT (which can achieve 10-50x over interpreted), but significant
 #   for a dynamic language.
 #
@@ -196,7 +196,7 @@ puts "  Time: #{'%.3f' % time}s"
 puts "  Mode: #{yjit_available ? 'YJIT (native code)' : 'YARV (interpreted)'}"
 
 # =============================================================================
-# BENCHMARK 5: Array/Hash Operations (typical Rails patterns)
+# BENCHMARK 5: Array/Hash Operations (typical Ruby patterns)
 # =============================================================================
 
 def collection_test(iterations)
@@ -207,9 +207,9 @@ def collection_test(iterations)
 end
 
 puts "\n#{'=' * 70}"
-puts "  BENCHMARK 5: Collection Operations (Rails-like)"
+puts "  BENCHMARK 5: Collection Operations (typical Ruby patterns)"
 puts "#{'=' * 70}"
-puts "  Tests: array creation, select, map, sum (common Rails patterns)"
+puts "  Tests: array creation, select, map, sum (common Ruby patterns)"
 
 coll_n = 50_000
 puts "  #{coll_n.to_s.gsub(/(\d)(?=(\d{3})+$)/, '\\1,')} iterations...\n\n"

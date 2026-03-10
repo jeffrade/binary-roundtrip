@@ -10,7 +10,7 @@
 #     ONLY ONE THREAD CAN EXECUTE RUBY BYTECODE AT A TIME.
 #
 #   This is the single most important thing to understand about Ruby concurrency.
-#   It's why Rails uses multiple PROCESSES (via Puma workers), not just threads.
+#   It's why Ruby web servers use multiple PROCESSES (via Puma workers), not just threads.
 #
 # WHAT TO OBSERVE:
 #   - CPU-bound work: 2 threads take the SAME time as 1 thread (GVL blocks parallelism)
@@ -99,7 +99,7 @@ puts "  All threads must take turns holding the lock to execute bytecode."
 # =============================================================================
 # When a thread does IO (file read, network call, sleep), it releases the GVL.
 # This allows OTHER threads to run their Ruby code while one thread waits.
-# This is why threaded web servers (Puma) work for IO-heavy Rails apps.
+# This is why threaded servers (Puma) work well for IO-heavy Ruby apps.
 # =============================================================================
 
 puts "\n#{'=' * 70}"
@@ -128,7 +128,7 @@ puts "  4 threads  (1 sleep each):  #{'%.3f' % time_threaded}s"
 io_speedup = time_sequential / time_threaded
 puts "\n  Speedup with threads: #{'%.2f' % io_speedup}x (ideal is 4.0x)"
 puts "  RESULT: Threads DO speed up IO-bound work!"
-puts "  This is why Puma uses threads: most Rails requests are IO-bound"
+puts "  This is why Puma uses threads: most web requests are IO-bound"
 puts "  (database queries, API calls, file reads)."
 
 # =============================================================================

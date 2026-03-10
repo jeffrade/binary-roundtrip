@@ -12,8 +12,8 @@
 #     5. Execute all top-level code in the file
 #     6. Register it in $LOADED_FEATURES so it's not loaded again
 #
-#   A typical Rails app loads THOUSANDS of files on boot. Each require goes
-#   through this entire pipeline. This is why Rails boot is slow (2-20 seconds)
+#   A large Ruby app loads THOUSANDS of files on boot. Each require goes
+#   through this entire pipeline. This is why startup is slow (2-20 seconds)
 #   and why tools like Bootsnap exist (they cache the compiled bytecode).
 #
 # WHAT TO OBSERVE:
@@ -36,7 +36,7 @@ puts "=" * 70
 # This is a real technique used by profiling tools like bootsnap and
 # ruby-prof. We wrap the original require to measure time around each call.
 #
-# NOTE: In production Rails, Bootsnap replaces this pipeline with:
+# NOTE: In large Ruby apps, Bootsnap replaces this pipeline with:
 #   1. Check if cached bytecode exists
 #   2. If yes: load cached bytecode directly (skip parse + compile)
 #   3. If no: normal require + cache the bytecode for next time
@@ -104,7 +104,7 @@ $LOAD_PATH.each_with_index do |path, i|
 end
 
 puts "\n  Total: #{$LOAD_PATH.length} directories"
-puts "  (Rails adds many more: app/models, app/controllers, lib, gems, etc.)"
+puts "  (A large Ruby app adds many more: lib/, app/, gems, etc.)"
 
 # =============================================================================
 # Show already-loaded files
@@ -241,28 +241,28 @@ RequireTracer.traces.each do |trace|
 end
 
 # =============================================================================
-# Simulate what Rails boot looks like
+# Simulate what a large Ruby app startup looks like
 # =============================================================================
 puts "\n\n#{'=' * 70}"
-puts "  SECTION 5: What Rails Boot Looks Like"
+puts "  SECTION 5: What a Large Ruby App Startup Looks Like"
 puts "#{'=' * 70}"
 puts <<~EXPLAIN
 
   We loaded #{libraries.length} stdlib libraries, which pulled in #{new_files} total files.
 
-  A typical Rails app loads:
+  A typical large Ruby app loads:
     - ~50 gem dependencies (each with their own requires)
     - ~200-500 gem files
-    - ~100-300 app files (models, controllers, views, etc.)
+    - ~100-300 app files (lib/, app/, etc.)
     - ~50-100 config/initializer files
     - Total: 500-1,000+ files on boot
 
   At ~1-5ms per file, that's 1-5 SECONDS just for require overhead.
   This is why:
     1. Bootsnap exists — caches parsed/compiled bytecode
-    2. Spring existed — kept a preloaded Rails process in the background
+    2. Process warming existed — kept a preloaded process in the background
     3. Zeitwerk is used — autoloads files lazily (only when class is first used)
-    4. Rails boot time is a constant complaint
+    4. Startup time in large Ruby apps is a constant concern
 
   The pipeline PER FILE:
     require 'foo'
@@ -310,14 +310,14 @@ puts "#{'=' * 70}"
 
 puts <<~EXPLAIN
 
-  Modern Rails (6+) uses Zeitwerk for autoloading:
+  Large Ruby projects use autoloading (Zeitwerk is a popular library for this):
 
     # Instead of:
     require 'app/models/user'       # loaded immediately at boot
     require 'app/models/post'       # loaded immediately at boot
     require 'app/models/comment'    # loaded immediately at boot
 
-    # Zeitwerk does:
+    # With autoloading:
     autoload :User, 'app/models/user'       # just register the name
     autoload :Post, 'app/models/post'       # just register the name
     autoload :Comment, 'app/models/comment' # just register the name

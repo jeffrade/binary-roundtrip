@@ -15,7 +15,7 @@
 - JIT compilation: tiered compilation, hotspot detection, deoptimization
 - AOT compilation: trade-offs vs JIT
 - Transpilation: when and why (CoffeeScript→JS, TypeScript→JS, Kotlin→JVM bytecode)
-- Where Ruby MRI, JRuby, Rails, Java, Rust, and Python each sit on this map
+- Where Ruby MRI, JRuby, Java, Rust, and Python each sit on this map
 
 ### Key Resources
 - Search for `CS:APP Bryant O'Hallaron 3rd edition` on the Web or Claude.ai — Ch. 1 (overview only)
@@ -215,8 +215,8 @@ java -XX:+UnlockDiagnosticVMOptions \
 
 ---
 
-## Module 9 — Ruby MRI Essentials: Interpreter Path and Rails Context
-*Goal: Understand how Ruby differs from both the C/Rust path and the JVM path, specifically in a Rails context.*
+## Module 9 — Ruby MRI Essentials: The Interpreter Path
+*Goal: Understand how Ruby differs from both the C/Rust path and the JVM path.*
 
 ### Topics
 - MRI Ruby (CRuby): the runtime is itself a C binary — Ruby executes inside a C process
@@ -227,8 +227,8 @@ java -XX:+UnlockDiagnosticVMOptions \
 - The GIL (Global VM Lock): one thread executes Ruby bytecode at a time — key architectural constraint
 - C extensions (`.so` files): how gems like `nokogiri` or `pg` drop to native — bypasses GIL, native ELF
 - JRuby as the alternative: compiles Ruby to JVM bytecode → Module 8 applies fully
-- Rails startup sequence: `bundle exec rails server` → Bundler → `require` chain → Rack → Puma → your code
-- What "slow Rails boot" actually is: thousands of `require` calls, each parsing and compiling `.rb` to YARV
+- Ruby app startup: the require chain — how bundler, gems, and your code are loaded
+- What "slow startup" actually is in large Ruby apps: thousands of `require` calls, each parsing and compiling `.rb` to YARV
 
 ### Key Commands
 ```bash
@@ -296,7 +296,7 @@ ghidra                          # GUI decompiler
 | 6 | Debuggers (binary level) | 4h |
 | 7 | Rust / LLVM Deep Dive | 6h |
 | 8 | JVM Essentials (Java/JRuby) | 3h |
-| 9 | Ruby MRI / Rails Essentials | 3h |
+| 9 | Ruby MRI Essentials | 3h |
 | 10 | Reverse Engineering | 6h |
 | **Total** | | **~41h** |
 
@@ -347,6 +347,6 @@ A: 1. Breadth (cover all topics), 2. Speed (learn it fast), 3. Practical skills 
 
 ### Derived Profile
 
-Strong at the application layer (Ruby/Rails, Java), near-zero visibility below it. No partial knowledge to patch — clean build from scratch. Priority ordering (breadth → speed → practical → deep) shaped module depth and ordering: Rust gets a full deep dive (Module 7) per student preference; JVM (Module 8) and Ruby MRI (Module 9) are scoped as "essentials" — enough to understand how they differ from the C/Rust path, not redundant deep dives. All external references are either direct verified URLs or explicit `Search for ${TOPIC}` instructions.
+Strong at the application layer (Ruby, Java), near-zero visibility below it. No partial knowledge to patch — clean build from scratch. Priority ordering (breadth → speed → practical → deep) shaped module depth and ordering: Rust gets a full deep dive (Module 7) per student preference; JVM (Module 8) and Ruby MRI (Module 9) are scoped as "essentials" — enough to understand how they differ from the C/Rust path, not redundant deep dives. All external references are either direct verified URLs or explicit `Search for ${TOPIC}` instructions.
 
 

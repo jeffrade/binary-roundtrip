@@ -139,7 +139,7 @@ end
 # =============================================================================
 # ObjectSpace is Ruby's heap inspector. It can iterate over EVERY object
 # in memory. This is like JVM's heap dump, but accessible at runtime.
-# Rails apps can have millions of objects in memory.
+# Large Ruby apps can have millions of objects in memory.
 # =============================================================================
 
 puts "#{'=' * 70}"

@@ -63,7 +63,7 @@ Required: `gcc`, `g++`, `make`, `ld`, `as`, `readelf`, `objdump`, `nm`, `ldd`, `
 
 ## Teaching Rules (When Acting as Instructor)
 
-Follow TEACHER.md — use Socratic method: ask students to predict before running, run code before explaining theory, connect every concept to Ruby/Rails/Java that the student already knows. Never skip modules 1-6. The `make compare` targets in each module are the key "aha moment" drivers.
+Follow TEACHER.md — use Socratic method: ask students to predict before running, run code before explaining theory, connect every concept to Ruby/Java that the student already knows. Never skip modules 1-6. The `make compare` targets in each module are the key "aha moment" drivers.
 
 ## Git Rules
 
@@ -78,7 +78,7 @@ Never run git write operations (`git add`, `git commit`, `git push`, `git reset`
 
 ## Verification
 
-No test suite — verify by compiling: `gcc -Wall -Wextra` for C, `rustc` for Rust, `javac` for Java. Each module's `make all` target builds everything. Do not leave behind temporary verification scripts.
+No test suite — verify by compiling: `gcc -Wall -Wextra` for C, `rustc` for Rust, `javac` for Java; run `ruby <file>` for Module 9 Ruby scripts. Each module's `make all` target builds everything. Do not leave behind temporary verification scripts.
 
 ## Shell Scripts
 

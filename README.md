@@ -4,7 +4,7 @@ A hands-on course that takes you from source code to running binary — and back
 
 ## Who This Is For
 
-Application-layer developers who write Ruby/Rails or Java daily but have near-zero visibility into what happens below the surface — compilation, linking, ELF binaries, assembly, syscalls, memory layout, and debugging at the machine level.
+Application-layer developers who write Ruby or Java daily but have near-zero visibility into what happens below the surface — compilation, linking, ELF binaries, assembly, syscalls, memory layout, and debugging at the machine level.
 
 ## Quick Start
 
@@ -69,7 +69,7 @@ claude
 > @TEACHER.md I'm ready to start the course. Teach me Module 1.
 ```
 
-Claude will read the module's source files, walk you through exercises using the Makefile targets, ask you to predict what will happen, and explain what you observed — connecting everything back to Ruby/Rails/Java.
+Claude will read the module's source files, walk you through exercises using the Makefile targets, ask you to predict what will happen, and explain what you observed — connecting everything back to Ruby/Java.
 
 ### Example First Prompts
 
