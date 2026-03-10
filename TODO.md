@@ -100,7 +100,11 @@ Actionable improvements for the course. Check items off as completed.
 - [ ] `make strings-crackme` / `make strace-mystery` / `make ltrace-mystery` — analysis targets
 - [ ] `make disasm-crackme` / `make disasm-mystery` / `make disasm-function-finder` — disassembly
 - [ ] `make solutions` — verify solutions output matches expectations
+- [ ] Ghidra walkthrough: No guided exercise. Add a `ghidra_walkthrough.txt` similar to `gdb_exercises.txt` in Module 06.
 - [ ] Manually solve the crackme to verify it works (password is XOR+offset encoded, not plaintext)
+
+### Capturing State in a File
+- [ ] Create a new Makefile target that will activate the TEACHER Agent to append to a new .gitignore'd file the state the user left of in. Something simple that is a common append current state type of algorithm
 
 ---
 
@@ -114,7 +118,5 @@ Actionable improvements for the course. Check items off as completed.
 
 ## Low Priority — Enhancements
 
-- [ ] **Student progress checklist**: Add a `PROGRESS.md` template students can copy and check off as they complete modules/targets.
 - [ ] **End-to-end smoke test script**: A script that runs every non-interactive `make` target across all modules and reports pass/fail. Would catch regressions if source files are edited.
-- [ ] **Ghidra walkthrough for Module 10**: The RE module mentions Ghidra but has no guided exercise. Could add a `ghidra_walkthrough.txt` similar to `gdb_exercises.txt` in Module 06.
 - [ ] **YJIT before/after benchmark**: Module 09 could show a concrete performance comparison with YJIT enabled vs disabled on the same workload.
